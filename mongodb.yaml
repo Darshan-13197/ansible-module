@@ -10,7 +10,7 @@
   
   - name: Install MongoDB Package
     ansible.builtin.package: #For this requires 2 fileds - name: and state
-      name: mongodb
+      name: mongodb-org #package name is mongodb-org.
       state: present
 
   #To start and enable MongoDB Services.
