@@ -4,7 +4,7 @@
   
   tasks:
   - name: Copy MongoDB Repo
-    ansible.builin.copy: # Which has Inbuilt module contains src: and dest:
+    ansible.builtin.copy: # Which has Inbuilt module contains src: and dest:
       src: mongodb.repo
       dest: /etc/yum.repos.d/mongo.repo
   
