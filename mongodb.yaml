@@ -20,7 +20,7 @@
       state: started
 
   - name: Update listen address from 127.0.0.1 to 0.0.0.0 in /etc/mongod.conf
-    ansible.builin.replace:
+    ansible.builtin.replace:
       path: /etc/mongod.conf
       regexp: '127.0.0.1'
       replace: '0.0.0.0'
