@@ -1,0 +1,26 @@
+- name: MONGODB INstallation
+  hosts: mongodb
+  become: yes
+  
+  tasks:
+  - name: Copy MongoDB Repo
+    ansible.builin.copy: # Which has Inbuilt module contains src: and dest:
+      src: mongodb.repo
+      dest: /etc/yum.repos.d/mongo.repo
+  
+  - name: Install MongoDB Package
+    ansible.builtin.package: #For this requires 2 fileds - name: and state
+      name: mongodb
+      state: present
+
+  #To start and enable MongoDB Services.
+  - name: Start and Enable Systemctl Services.
+    ansible.builtin.service: #Contains 2 fields - name and state
+      name: mongod
+      state: started
+
+  - name: Update listen address from 127.0.0.1 to 0.0.0.0 in /etc/mongod.conf
+    ansible.builin.replace:
+      path: /etc/mongod.conf
+      regexp: '127.0.0.1'
+      replace: '0.0.0.0'
