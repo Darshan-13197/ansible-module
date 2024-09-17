@@ -1,0 +1,31 @@
+- name: Install RabbitMQ Component
+  hosts: rabbitmq
+  become: yes
+
+  tasks:
+    - name: Configure YUM Repos using ERLANG
+      ansible.builtin.shell: curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | bash
+      #we need to use SHELL module. Command module is not wroking here.
+
+    - name: Configure YUM Repos for RabbitMQ Server
+      ansible.builtin.shell: curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | bash
+
+    - name: Installing RabbingMQ
+      ansible.biultin.dnf:
+        name: rabbitmq-server
+        state: present
+    
+    - name: Start and Enable rabbitmq 
+      ansible.builtin.service:
+        name: rabbitmq-server
+        state: started 
+        enabled: yes
+    
+    - name: Create User #create one user for this application.
+      ansible.builtin.command: rabbitmqctl add_user roboshop roboshop123 
+      # we cannot use USER module to create a user for the Rabbitmq.
+
+    - name: Set the Permission for a Created USER
+      ansible.builtin.command: rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" 
+
+

@@ -1,0 +1,59 @@
+- name: Install PAYMENT Component
+  hosts: payment
+  become: yes
+
+  tasks:
+  - name: Install Python3.6 #Payment Service is written in Python3.6
+    ansible.builtin.dnf:
+      name: "{{item}}"
+      state: present
+    loop:       #It will install the packages one by one using ITEM
+    - python36
+    - gcc
+    - python3-deve1
+
+  - name: create a USER
+    ansible.builtin.user:
+      - name: roboshop
+  
+  - name: Recursively remove app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent
+
+  - name: create app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory   
+  
+  # To Download the application we using get_url module.
+  - name: download Payment application
+    ansible.builtin.get_url:
+      url: https://roboshop-builds.s3.amazonaws.com/payment.zip
+      dest: /tmp
+
+  - name: extract payment application
+    ansible.builtin.unarchive:
+      src: /tmp/payment.zip
+      dest: /app
+      remote_src: yes  #File is already in a target machine. we just need to archive it
+
+  - name: Install dependencies (To change the working dir into /app dir)
+    ansible.builtin.command: pip3.6 install -r requirements.txt
+    args:
+      chdir: /app
+
+  - name: Copy Payment service
+    ansible.builtin.copy:
+      src: payment.service
+      dest: /etc/systemd/system/payment.service
+
+  - name: deamon reload and start
+    ansible.builtin.systemd_service:
+      daemon_reload: true #Before starting, we are doing Daemon reload
+  
+  - name: Start and Enable Payment
+    ansible.builtin.service:
+    name: payment
+    state: started
+    enabled: yes

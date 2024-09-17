@@ -1,0 +1,88 @@
+- name: Install SHIPPING Component
+  hosts: shipping
+  become: yes
+  vars: #In task level, we are calling the value, which we have declared the Variable: mysql_password
+    mysql_password: RoboShop@1
+
+  tasks:
+  - name: Install Maven # Shipping service is written in Java, Hence we need to install Java.
+    ansible.builtin.dnf: #package is also used
+      name: maven #Maven is a Java Packaging software, Hence we are going to install maven, This indeed takes care of java installation.
+      state: present 
+
+  - name: create roboshop user
+    ansible.builtin.user:
+      name: roboshop
+
+  - name: Recursively remove app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent
+
+  - name: create app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory 
+
+# To Download the application we using get_url module.
+  - name: download shipping application
+    ansible.builtin.get_url:
+      url: https://roboshop-builds.s3.amazonaws.com/shipping.zip
+      dest: /tmp
+
+  - name: extract shipping application
+    ansible.builtin.unarchive:
+      src: /tmp/shipping.zip
+      dest: /app
+      remote_src: yes  #File is already in a target machine. we just need to archive it
+
+  - name: Install dependencies (To change the working dir into /app dir)
+    ansible.builtin.command: mvn clean package
+    args:
+      chdir: /app
+
+  - name: Renaming the JAR file
+    ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar
+    args:
+    chdir: /app #the rename should happen in /app directory
+
+  - name: Copy system service
+    ansible.builtin.copy:
+      src: shipping.service
+      dest: /etc/systemd/system/shipping.service
+
+  - name: Daemon reload and start
+    ansible.builtin.systemd_service: 
+      daemon_reload: TRUE
+  
+  - name: Install MySql Client #We need to load the schema. To load schema we need to install mysql client.
+    ansible.builtin.package:
+      name: mysql
+      state: present
+
+  - name: Check cities scheman exists or not
+    ansible.builtin.command: mysql -h mysql.darshanshop.online -uroot -p{{mysql_password}} -sN -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'cities'"
+      register: schema # The following CMD OUTPUT which need to REGISTER
+
+
+  - name: Print Output.
+    ansible.builtin.debug:
+      msg: "schema output: {{schema}}"
+# Upto here, Save it and RUN, to verify. Based on the output we can RUN the next command
+
+  - name: Load the Cities Data
+    ansible.builtin.shell: mysql -h mysql.darshanshop.online -uroot -{{mysql_password}} < /app/schema/shipping.sql # no need to give space in b/w -p
+    when: schema.stdout != "1" 
+    # It Means, Does not EXISTS. if Cities DB is not there, then we are loading 'cities' schema 
+    # AGAIN, Save it and RUN to verify.
+    # Here, you will see the ERROR (CMD vs SHELL). need to use shell module. command module is not accepting when you load the cities data.
+    # SHELL : It is like you log in inside server and  running the command. (ENV Variables and REDIRECTION will work)
+    # COMMAND : It is like running command from Ouside server. (ENV Variables and REDIRECTION won't work here.)
+    # SAVE IT and RUN
+    # After Cities data is loaded successfully, Restart the Shipping
+
+  - name: Start and Enable SHIPPING 
+    ansible.builtin.service:
+      name: shipping
+      state: restarted
+      enabled: yes

@@ -1,0 +1,80 @@
+- name: user
+  hosts: user
+  become: yes
+  tasks:
+  - name: disable old nodejs and enable nodejs
+    ansible.builtin.shell: dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
+
+  - name: Install nodejs
+    ansible.builtin.dnf:
+      name: nodejs 
+      state: present
+
+  - name: create roboshop user
+    ansible.builtin.user:
+      name: roboshop
+
+  - name: Recursively remove app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent
+
+  - name: create app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory 
+
+# To Download the application we using get_url module.
+  - name: download user application
+    ansible.builtin.get_url:
+      url: https://roboshop-builds.s3.amazonaws.com/user.zip
+      dest: /tmp
+
+  - name: extract user application
+    ansible.builtin.unarchive:
+      src: /tmp/user.zip
+      dest: /app
+      remote_src: yes  #File is already in a target machine. we just need to archive it
+
+  - name: Install dependencies (To change the working dir into /app dir)
+    ansible.builtin.command: npm install
+    args:
+      chdir: /app
+
+  - name: Copy user service
+    ansible.builtin.copy:
+      src: user.service
+      dest: /etc/systemd/system/user.service
+
+  - name: deamon reload and start
+    ansible.builtin.systemd_service:
+      daemon_reload: true #Before starting, we are doing Daemon reload
+
+  # let's start after the data is loaded. so we need to load the schema i.e. mongodb repo.
+  - name: Copy mongodb repo
+    ansible.builtin.copy:
+      src: mongodb.repo
+      dest: /etc/yum.repos.d/mongodb.repo
+
+  - name: Install mongodb client
+    ansible.builtin.package:
+      name: mongodb-org-shell
+      state: present
+
+  - name: get the users count
+    ansible.builtin.command:  mongo --host mongodb.darshanshop.online --quiet --eval 'db = db.getSiblingDB("users"); db.users.count()'
+    register: user_count
+
+  # - name: print the count
+  #   ansible.builtin.debug:
+  #     msg: "product count: {{users_count}}"
+
+  - name: load user data
+    ansible.builtin.command: mongo --host mongodb.daws76s.online < /app/schema/user.js
+    when: user_count.stdout == "0" # keep double quotes then only it will consider.
+
+  - name: start and enable user
+    ansible.builtin.service:
+      name: user
+      state: restarted
+      enabled: yes

@@ -1,0 +1,31 @@
+- name: Install REDIS Component
+  hosts: redis
+  become: yes
+
+  tasks:
+  - name: Install REDIS REPO FILE using RPM
+    ansible.builtin.dnf:
+      name: https://rpms.remirepo.net/enterprise/remi-release-8.rpm #-y not required when you have module
+      state: present
+      disable_gpg_check: true 
+      # By Default False, So we need to give it TRUE so that it won't throw Error.
+  
+  - name: Enable REDIS Module
+    ansible.builtin.command: dnf module enable redis:remi-6.2 -y #we do not have seperate ENABLE module
+  
+  - name: Install Redis
+      ansible.builtin.dnf:
+      name: redis
+      state: present
+
+  - name: Allow Remote Connection
+    ansible.builin.replace:
+      name: /etc/redis.conf
+      regexp: '127.0.0.1'
+      replace: '0.0.0.0'
+
+  - name: Start and Enable REDIS
+    ansible.builtin.service:
+      name: redis
+      state: restarted
+      enabled: yes 
