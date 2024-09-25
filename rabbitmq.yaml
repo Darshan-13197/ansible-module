@@ -29,3 +29,4 @@
       ansible.builtin.command: rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" 
 
 
+
