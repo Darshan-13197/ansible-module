@@ -65,16 +65,16 @@
     ansible.builtin.command:  mongo --host mongodb.darshanshop.online --quiet --eval 'db = db.getSiblingDB("users"); db.users.count()'
     register: user_count
 
-  - name: print the count
-    ansible.builtin.debug:
-      msg: "product count: {{users_count}}"
+  # - name: print the count
+  #   ansible.builtin.debug:
+  #     msg: "product count: {{users_count}}"
 
-  # - name: load user data
-  #   ansible.builtin.command: mongo --host mongodb.daws76s.online < /app/schema/user.js
-  #   when: user_count.stdout == "0" # keep double quotes then only it will consider.
+  - name: load user data
+    ansible.builtin.command: mongo --host mongodb.darshanshop.online < /app/schema/user.js
+    when: user_count.stdout == "0" # keep double quotes then only it will consider.
 
-  # - name: start and enable user
-  #   ansible.builtin.service:
-  #     name: user
-  #     state: restarted
-  #     enabled: yes
+  - name: start and enable user
+    ansible.builtin.service:
+      name: user
+      state: restarted
+      enabled: yes
