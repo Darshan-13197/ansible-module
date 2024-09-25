@@ -10,7 +10,7 @@
     loop:       #It will install the packages one by one using ITEM
     - python36
     - gcc
-    - python3-deve1
+    - python3-devel
 
   - name: create a USER
     ansible.builtin.user:
