@@ -24,7 +24,7 @@
       enabled: yes
 
   - name: Setup a ROOT Password
-      ansible.builtin.command: mysql_secure_installation --set-root-pass RoboShop@1
+    ansible.builtin.command: mysql_secure_installation --set-root-pass RoboShop@1
 
   # mysql -uroot -pRoboShop@1 -->You can check the new password working or not using the following command in MySQL.
 
