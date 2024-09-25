@@ -45,7 +45,7 @@
   - name: Renaming the JAR file
     ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar
     args:
-    chdir: /app #the rename should happen in /app directory
+      chdir: /app #the rename should happen in /app directory
 
   - name: Copy system service
     ansible.builtin.copy:
