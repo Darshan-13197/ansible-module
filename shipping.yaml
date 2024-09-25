@@ -71,16 +71,17 @@
       msg: "schema output: {{schema}}"
 # Upto here, Save it and RUN, to verify. Based on the output we can RUN the next command
 
-  # - name: Load the Cities Data
-  #   ansible.builtin.shell: mysql -h mysql.darshanshop.online -uroot -p{{mysql_password}} < /app/schema/shipping.sql # no need to give space in b/w -p
-  #   when: schema.stdout != "1" 
-  #   # It Means, Does not EXISTS. if Cities DB is not there, then we are loading 'cities' schema 
-  #   # AGAIN, Save it and RUN to verify.
-  #   # Here, you will see the ERROR (CMD vs SHELL). need to use shell module. command module is not accepting when you load the cities data.
-  #   # SHELL : It is like you log in inside server and  running the command. (ENV Variables and REDIRECTION will work)
-  #   # COMMAND : It is like running command from Ouside server. (ENV Variables and REDIRECTION won't work here.)
-  #   # SAVE IT and RUN
-  #   # After Cities data is loaded successfully, Restart the Shipping
+  - name: Load the Cities Data
+    ansible.builtin.shell: mysql -h mysql.darshanshop.online -uroot -p{{mysql_password}} < /app/schema/shipping.sql # no need to give space in b/w -p
+    when: schema.stdout != "1" 
+    
+    # It Means, Does not EXISTS. if Cities DB is not there, then we are loading 'cities' schema 
+    # AGAIN, Save it and RUN to verify.
+    # Here, you will see the ERROR (CMD vs SHELL). need to use shell module. command module is not accepting when you load the cities data.
+    # SHELL : It is like you log in inside server and  running the command. (ENV Variables and REDIRECTION will work)
+    # COMMAND : It is like running command from Ouside server. (ENV Variables and REDIRECTION won't work here.)
+    # SAVE IT and RUN
+    # After Cities data is loaded successfully, Restart the Shipping
 
   # - name: Start and Enable SHIPPING 
   #   ansible.builtin.service:
