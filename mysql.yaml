@@ -14,13 +14,13 @@
 
   - name: Install MySQL Server
     ansible.builtin.package:
-      name: mysql-community-server 
+      name: mysql-community-server
       state: present
 
   - name: Start and Enable Mysql # Befoer setup we need to start
     ansible.builtin.service:
-      name: mysqld  
-      state: started #restarted is also fine.
+      name: mysqld
+      state: started #restarted is also fine
       enabled: yes
 
   - name: Setup a ROOT Password
