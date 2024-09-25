@@ -63,7 +63,7 @@
 
   - name: Check cities scheman exists or not
     ansible.builtin.command: mysql -h mysql.darshanshop.online -uroot -p{{mysql_password}} -sN -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'cities'"
-      register: schema # The following CMD OUTPUT which need to REGISTER
+    register: schema # The following CMD OUTPUT which need to REGISTER
 
 
   - name: Print Output.
