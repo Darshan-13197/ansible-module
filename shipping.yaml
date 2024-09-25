@@ -74,7 +74,7 @@
   - name: Load the Cities Data
     ansible.builtin.shell: mysql -h mysql.darshanshop.online -uroot -p{{mysql_password}} < /app/schema/shipping.sql # no need to give space in b/w -p
     when: schema.stdout != "1" 
-    
+
     # It Means, Does not EXISTS. if Cities DB is not there, then we are loading 'cities' schema 
     # AGAIN, Save it and RUN to verify.
     # Here, you will see the ERROR (CMD vs SHELL). need to use shell module. command module is not accepting when you load the cities data.
@@ -83,8 +83,8 @@
     # SAVE IT and RUN
     # After Cities data is loaded successfully, Restart the Shipping
 
-  # - name: Start and Enable SHIPPING 
-  #   ansible.builtin.service:
-  #     name: shipping
-  #     state: restarted
-  #     enabled: yes
+  - name: Start and Enable SHIPPING 
+    ansible.builtin.service:
+      name: shipping
+      state: restarted
+      enabled: yes
